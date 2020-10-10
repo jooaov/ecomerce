@@ -1,6 +1,9 @@
 <?php 
 
 namespace Hcode\DB;
+
+use function PHPSTORM_META\type;
+
 class Sql {
 
 	const HOSTNAME = "127.0.0.1:3308";
@@ -54,7 +57,6 @@ class Sql {
 	{
 
 		$stmt = $this->conn->prepare($rawQuery);
-
 		$this->setParams($stmt, $params);
 
 		$stmt->execute();

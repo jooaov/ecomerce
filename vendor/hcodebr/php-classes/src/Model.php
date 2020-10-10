@@ -1,18 +1,18 @@
 <?php
 namespace Hcode;
-
 class Model {
 
-    private $values = [];
-
+    public $values = [];
+    
     public function __call($name, $arguments)
     {
+        //get / set
         $method = substr($name,0,3);
+        //nome da função
         $fieldName = substr($name,3,strlen($name));
-
         switch ($method) {
             case 'get':
-                $this->values[$fieldName];
+                return $this->values[$fieldName];
                 break;
 
             case 'set':
@@ -20,7 +20,6 @@ class Model {
                 break;
         }
     }
-
     public function setData ($data = array()){
         foreach ($data as $key => $value) {
             $this->{"set".$key}($value);
