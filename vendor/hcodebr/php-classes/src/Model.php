@@ -1,5 +1,8 @@
 <?php
 namespace Hcode;
+
+use Hcode\model\Products;
+
 class Model {
 
     public $values = [];
@@ -30,5 +33,15 @@ class Model {
     {
         return $this->values;
     }
+
+    public static function checkList($list){
+        foreach ($list as &$row) {
+            $p = new Products();
+            $p->setData($row);
+            $row = $p->getValues();
+        }
+        return $list;
+    }
+
 
 }
