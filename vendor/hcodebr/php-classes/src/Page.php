@@ -20,7 +20,7 @@ class Page {
         $config = array(
             "tpl_dir"       => $_SERVER["DOCUMENT_ROOT"].$opts_dir,
             "cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/view-cache/",
-            "debug"         => false // set to false to improve the speed
+            "debug"         => true // set to false to improve the speed
            );
         Tpl::configure( $config );
 
@@ -28,7 +28,6 @@ class Page {
         $this->setData($this->options["data"]);
         if($this ->options["header"] == true)
             $this->tpl->draw("header");
-
     }
 
     private function setData($data = array()){
