@@ -33,3 +33,16 @@ $app->get("/categories/:idcategory",function($idcategory){
 		'pages'=>$pages,
 	]);
 });
+
+$app->get("/products/:desurl",function($desurl){
+	$product = new Products();
+	$product->getFromURL($desurl);
+	$page = new Page();
+	var_dump($product->getValues());
+	var_dump($product->getCategories());
+	var_dump($product->getidproduct());
+	$page->setTpl("product-detail",[
+		'product'=>$product->getValues(),
+		'categories'=>$product->getCategories(),
+	]);
+});
