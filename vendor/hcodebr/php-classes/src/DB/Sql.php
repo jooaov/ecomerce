@@ -15,13 +15,16 @@ class Sql {
 
 	public function __construct()
 	{
-
 		$this->conn = new \PDO(
 			"mysql:dbname=".Sql::DBNAME.";host=".Sql::HOSTNAME, 
 			Sql::USERNAME,
 			Sql::PASSWORD
 		);
 
+	}
+
+	public function getErros(){
+		return $this->conn->error;
 	}
 
 	private function setParams($statement, $parameters = array())
@@ -44,13 +47,15 @@ class Sql {
 
 	public function query($rawQuery, $params = array())
 	{
-
 		$stmt = $this->conn->prepare($rawQuery);
 
 		$this->setParams($stmt, $params);
 
-		$stmt->execute();
-
+		$resp=$stmt->execute();
+		
+		if(!$resp){
+			var_dump($stmt->errorInfo());
+		}
 	}
 
 	public function select($rawQuery, $params = array()):array
@@ -59,12 +64,13 @@ class Sql {
 		$stmt = $this->conn->prepare($rawQuery);
 		$this->setParams($stmt, $params);
 
-		$stmt->execute();
-
-		return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
+		$resp=$stmt->execute();
+		if($resp){
+			return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+		}else{
+			 var_dump($stmt->errorInfo());
+		}
 	}
-
 }
 
  ?>

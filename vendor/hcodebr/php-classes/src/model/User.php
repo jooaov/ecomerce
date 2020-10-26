@@ -12,6 +12,36 @@ class User extends Model
     const SECRET = "HcodePhp7_Secret";
     const SECRET_IV = "HcodePhp7_Secret_IV";
 
+    public static function getFromSession() {
+        $user = new User();
+        if(isset($_SESSION[USER::SESSION]) && (int)$_SESSION[USER::SESSION]['iduser']>0){
+            $user->setData($_SESSION[USER::SESSION]);
+        }
+        return $user;
+    }
+
+    public static function checkLogin($inadmin = true)
+    {
+        if(!isset($_SESSION[User::SESSION])
+        ||
+        !$_SESSION[User::SESSION]
+        ||
+        !(int) $_SESSION[User::SESSION]["iduser"] > 0)
+        {
+            return false;
+        }else
+        {
+            if($inadmin === true && $_SESSION[User::SESSION]["inadmin" === true]){
+                return true;
+            }else if($inadmin === false){
+                return false;
+            }else{
+                return false;
+            }
+
+        }
+    }
+
     public static function login($login, $password)
     {
         $sql = new Sql();
@@ -38,16 +68,7 @@ class User extends Model
     public static function verifyLogin($inadmin = true)
     {
         //se der true não entra
-        if (
-            !isset($_SESSION[User::SESSION])
-            ||
-            !$_SESSION[User::SESSION]
-            ||
-            !(int) $_SESSION[User::SESSION]["iduser"] > 0
-            ||
-            (bool) $_SESSION[User::SESSION]["inadmin"] !== $inadmin
-
-        ) {
+        if (User::checkLogin(($inadmin))) {
             header("Location: /admin/login");
             exit;
         }
@@ -107,7 +128,6 @@ class User extends Model
     public function delete()
     {
         $sql = new Sql();
-
         $sql->query("CALL sp_users_delete(:ID)", array(
             ":ID" => $this->getiduser(),
         ));

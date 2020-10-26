@@ -43,8 +43,11 @@ class Products extends Model
 
     public function delete()
     {
+        var_dump(array(
+                ":idproduct" => $this->getidproduct()
+        ));
         $sql = new Sql();
-        $sql->query("DELETE FROM tb_products WHERE idproduct = :idproduct", array(
+        $sql->query("DELETE FROM tb_products WHERE idproduct = :idproduct",array(
             ":idproduct" => $this->getidproduct()
         ));
     }
@@ -107,7 +110,6 @@ class Products extends Model
     }
 
     public function getFromURL($url){
-        // 
         $sql = new Sql();
         $rows=$sql->select("SELECT * FROM tb_products WHERE desurl = :desurl",[
             "desurl"=>$url
