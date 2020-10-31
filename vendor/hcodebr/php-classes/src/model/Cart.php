@@ -18,7 +18,6 @@ class Cart extends Model
         if (isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart'] > 0) {
 
             $cart->get((int)$_SESSION[Cart::SESSION]['idcart']);
-            
         } else {
             $cart->getFromSessionID();
             if (!(int)$cart->getidcart() > 0) {
@@ -45,18 +44,18 @@ class Cart extends Model
 
 
     public function save()
-	{
-		$sql = new Sql();
-		$results = $sql->select("CALL sp_carts_save(:idcart, :dessessionid, :iduser, :deszipcode, :vlfreight, :nrdays)", [
-			':idcart'=>$this->getidcart(),
-			':dessessionid'=>$this->getdessessionid(),
-			':iduser'=>$this->getiduser(),
-			':deszipcode'=>$this->getdeszipcode(),
-			':vlfreight'=>$this->getvlfreight(),
-			':nrdays'=>$this->getnrdays()
+    {
+        $sql = new Sql();
+        $results = $sql->select("CALL sp_carts_save(:idcart, :dessessionid, :iduser, :deszipcode, :vlfreight, :nrdays)", [
+            ':idcart' => $this->getidcart(),
+            ':dessessionid' => $this->getdessessionid(),
+            ':iduser' => $this->getiduser(),
+            ':deszipcode' => $this->getdeszipcode(),
+            ':vlfreight' => $this->getvlfreight(),
+            ':nrdays' => $this->getnrdays()
         ]);
         $this->setData($results[0]);
-	}
+    }
 
     public function get(int $idcart)
     {
@@ -77,5 +76,42 @@ class Cart extends Model
             $this->setData($results[0]);
         } else {
         }
+    }
+
+    public function addProduct(Products $product)
+    {
+        $sql = new Sql();
+        $sql->query("INSERT INTO tb_cartsproducts (idcart,idproduct) VALUES(:IDCART,:IDPRODUCT)", [
+            ":IDCART" => $this->getidcart(),
+            ":IDPRODUCT" => $product->getidproduct(),
+        ]);
+    }
+
+    public function removeProduct(Products $product, $all = false)
+    {
+        $sql = new Sql();
+
+        if ($all === true) {
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart = :IDCART AND idproduct = :IDPRODUCT AND dtremoved IS NULL", [
+                ":IDCART" => $this->getidcart(),
+                ":IDPRODUCT" => $product->getidproduct(),
+            ]);
+        } else {
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart = :IDCART AND idproduct = :IDPRODUCT AND dtremoved IS NULL LIMIT 1", [
+                ":IDCART" => $this->getidcart(),
+                ":IDPRODUCT" => $product->getidproduct(),
+            ]);
+        }
+    }
+
+    public function getProducts()
+    {
+        $sql = new Sql();
+        return Products::checkList($sql->select("SELECT b.idproduct ,b.desproduct,b.vlprice,b.vlheight,b.vlweight,b.desurl,COUNT(*) AS nrqtd,SUM(b.vlprice) AS vltotal FROM tb_cartsproducts a INNER JOIN tb_products b ON a.idproduct = b.idproduct WHERE
+         a.idcart = :IDCART AND a.dtremoved IS NULL
+          GROUP BY b.idproduct ,b.desproduct,b.vlprice,b.vlheight,b.vlweight,b.desurl
+          ORDER BY b.desproduct", [
+            ":IDCART" => $this->getidcart()
+        ]));
     }
 }
