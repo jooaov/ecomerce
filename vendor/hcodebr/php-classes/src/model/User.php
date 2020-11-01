@@ -174,9 +174,9 @@ class User extends Model {
 				$code = openssl_encrypt($dataRecovery['idrecovery'], 'AES-128-CBC', pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV));
 				$code = base64_encode($code);
 				if ($inadmin === true) {
-					$link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+					$link = "http://ecomerce.com.br/admin/forgot/reset?code=$code";
 				} else {
-					$link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
+					$link = "http://ecomerce.com.br/forgot/reset?code=$code";
 				}				
 				$mailer = new Mailer($data['desemail'], $data['desperson'], "Redefinir senha da Hcode Store", "forgot", array(
 					"name"=>$data['desperson'],
