@@ -123,12 +123,13 @@ $app->get("/checkout", function () {
 	if (!$address->getdesstate()) $address->setdesstate('');
 	if (!$address->getdescountry()) $address->setdescountry('');
 	if (!$address->getdeszipcode()) $address->setdeszipcode('');
+
 	$page = new Page();
 	$page->setTpl("checkout", [
 		'cart' => $cart->getValues(),
 		'address' => $address->getValues(),
 		'products' => $cart->getProducts(),
-		'error' => Address::getMsgError()
+		'checkoutError' => Address::getMsgError()
 	]);
 });
 
