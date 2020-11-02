@@ -1,23 +1,48 @@
 <?php
+
 use \Hcode\Model\User;
 use \Hcode\PageAdmin;
 
-$app->get('/admin/users', function() {
+$app->get('/admin/users', function () {
 	User::verifyLogin();
-	$users = User::listAll();
-	$admin =new PageAdmin();
-	$admin->setTpl('users',array(
-		"users"=>$users
+
+	$page = (isset($_GET['page'])) ? $_GET['page'] : 1;
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+
+	if ($search != '') {
+		$pagination = User::getPageSearch($search, $page);
+	} else {
+		$pagination = User::getPage($page);
+	}
+
+
+	$pages = [];
+	for ($x = 0; $x < $pagination['pages']; $x++) {
+		array_push($pages, [
+			'href' => '/admin/users?' . http_build_query([
+				'page' => $x + 1,
+				'search' => $search
+			]),
+			'text' => $x + 1
+		]);
+	}
+
+	$users = User::getPage();
+	$admin = new PageAdmin();
+	$admin->setTpl('users', array(
+		"users" => $pagination['data'],
+		"search" => $search,
+		"pages" => $pages,
 	));
 });
 
-$app->get('/admin/users/create', function() {
+$app->get('/admin/users/create', function () {
 	User::verifyLogin();
-	$admin =new PageAdmin();
+	$admin = new PageAdmin();
 	$admin->setTpl('users-create');
 });
 
-$app->get('/admin/users/:iduser/delete', function($iduser) {
+$app->get('/admin/users/:iduser/delete', function ($iduser) {
 	User::verifyLogin();
 	$user = new User();
 	$user->get((int)$iduser);
@@ -26,23 +51,23 @@ $app->get('/admin/users/:iduser/delete', function($iduser) {
 	exit;
 });
 
-$app->get('/admin/users/:iduser', function($iduser) {
+$app->get('/admin/users/:iduser', function ($iduser) {
 	User::verifyLogin();
 	$user = new User();
 	$user->get((int)$iduser);
-	$admin =new PageAdmin();
-	$admin->setTpl('users-update',array(
-		"user"=>$user->getValues()
+	$admin = new PageAdmin();
+	$admin->setTpl('users-update', array(
+		"user" => $user->getValues()
 	));
 });
 
-$app->post("/admin/users/create",function(){
+$app->post("/admin/users/create", function () {
 	User::verifyLogin();
 	$user = new User();
-	$_POST['inadimin'] = isset($_POST['inadimin'])?1:0;
- 	$_POST['despassword'] = password_hash($_POST["despassword"], PASSWORD_DEFAULT, [
- 		"cost"=>12
- 	]);
+	$_POST['inadimin'] = isset($_POST['inadimin']) ? 1 : 0;
+	$_POST['despassword'] = password_hash($_POST["despassword"], PASSWORD_DEFAULT, [
+		"cost" => 12
+	]);
 
 	$user->setData($_POST);
 	$user->save();
@@ -50,7 +75,7 @@ $app->post("/admin/users/create",function(){
 	exit;
 });
 
-$app->post('/admin/users/:iduser', function($iduser) {
+$app->post('/admin/users/:iduser', function ($iduser) {
 	User::verifyLogin();
 	$user = new User();
 	$user->get((int)$iduser);
@@ -59,6 +84,3 @@ $app->post('/admin/users/:iduser', function($iduser) {
 	header("Location: /admin/users");
 	exit;
 });
-
-
-?>
