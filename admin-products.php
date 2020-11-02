@@ -6,12 +6,40 @@ use \Hcode\Model\User;
 
 
 $app->get("/admin/products",function(){
-	User::verifyLogin();
-    $products = Products::listAll();
-    $page = new PageAdmin();
-    $page->setTpl("products",[
-        "products"=>$products
-    ]);
+    // $products = Products::listAll();
+    // $page = new PageAdmin();
+    // $page->setTpl("products",[
+    //     "products"=>$products
+    // ]);
+    User::verifyLogin();
+
+	$page = (isset($_GET['page'])) ? $_GET['page'] : 1;
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+
+	if ($search != '') {
+		$pagination = Products::getPageSearch($search, $page,1);
+	} else {
+		$pagination = Products::getPage($page,1);
+	}
+
+
+	$pages = [];
+	for ($x = 0; $x < $pagination['pages']; $x++) {
+		array_push($pages, [
+			'href' => '/admin/products?' . http_build_query([
+				'page' => $x + 1,
+				'search' => $search
+			]),
+			'text' => $x + 1
+		]);
+	}
+
+	$admin = new PageAdmin();
+	$admin->setTpl('products', array(
+		"products" => $pagination['data'],
+		"search" => $search,
+		"pages" => $pages,
+	));
 });
 
 $app->get("/admin/products/create",function(){
