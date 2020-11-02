@@ -17,16 +17,36 @@ $app->get("/admin/orders/:idorder/delete", function ($idorder) {
     exit;
 });
 
-$app->get("/admin/orders", function () {
-    User::verifyLogin();
+$app->get("/admin/orders", function(){
+	User::verifyLogin();
 
-    $page = new pageAdmin();
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+	if ($search != '') {
+		$pagination = Order::getPageSearch($search, $page,1);
+	} else {
+		$pagination = Order::getPage($page,1);
+	}
+	$pages = [];
 
-    $page->setTpl("orders", [
-        "orders" => Order::listAll()
-    ]);
+	for ($x = 0; $x < $pagination['pages']; $x++)
+	{
+		array_push($pages, [
+			'href'=>'/admin/orders?'.http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			'text'=>$x+1
+		]);
+	}
+
+	$page = new PageAdmin();
+	$page->setTpl("orders", [
+		"orders"=>$pagination['data'],
+		"search"=>$search,
+		"pages"=>$pages
+	]);
 });
-
 $app->get("/admin/orders/:idorder", function ($idorder) {
     User::verifyLogin();
     $order = new Order();

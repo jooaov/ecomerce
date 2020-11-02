@@ -6,11 +6,6 @@ use \Hcode\Model\User;
 
 
 $app->get("/admin/products",function(){
-    // $products = Products::listAll();
-    // $page = new PageAdmin();
-    // $page->setTpl("products",[
-    //     "products"=>$products
-    // ]);
     User::verifyLogin();
 
 	$page = (isset($_GET['page'])) ? $_GET['page'] : 1;
