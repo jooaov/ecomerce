@@ -129,7 +129,7 @@ class User extends Model {
 			":nrphone"=>$this->getnrphone(),
 			":inadmin"=>$this->getinadmin()
 		));
-		$this->setData($results[0]);		
+		$this->setData($results[0]);
 	}
 
 	public function delete()
