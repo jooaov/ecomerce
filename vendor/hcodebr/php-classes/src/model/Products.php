@@ -43,9 +43,6 @@ class Products extends Model
 
     public function delete()
     {
-        var_dump(array(
-                ":idproduct" => $this->getidproduct()
-        ));
         $sql = new Sql();
         $sql->query("DELETE FROM tb_products WHERE idproduct = :idproduct",array(
             ":idproduct" => $this->getidproduct()
