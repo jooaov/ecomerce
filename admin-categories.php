@@ -8,11 +8,34 @@ use \Hcode\Page;
 
 $app->get("/admin/categories",function(){
 	User::verifyLogin();
-	$categories = Category::listAll();
-	$page = new PageAdmin();
-	$page->setTpl("categories",[
-		"categories"=>$categories
-	]);
+
+	$page = (isset($_GET['page'])) ? $_GET['page'] : 1;
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+
+	if ($search != '') {
+		$pagination = Category::getPageSearch($search, $page,1);
+	} else {
+		$pagination = Category::getPage($page,1);
+	}
+
+
+	$pages = [];
+	for ($x = 0; $x < $pagination['pages']; $x++) {
+		array_push($pages, [
+			'href' => '/admin/categories?' . http_build_query([
+				'page' => $x + 1,
+				'search' => $search
+			]),
+			'text' => $x + 1
+		]);
+	}
+
+	$admin = new PageAdmin();
+	$admin->setTpl('categories', array(
+		"categories" => $pagination['data'],
+		"search" => $search,
+		"pages" => $pages,
+	));
 });
 
 $app->get("/admin/categories/create",function(){

@@ -27,7 +27,6 @@ $app->get('/admin/users', function () {
 		]);
 	}
 
-	$users = User::getPage();
 	$admin = new PageAdmin();
 	$admin->setTpl('users', array(
 		"users" => $pagination['data'],
