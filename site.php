@@ -196,9 +196,16 @@ $app->post("/checkout", function () {
 
 
 	$order->save();
+	switch ((int)$_POST['payment-method']) {
+		case 1:
+			header('Location: /order/' . $order->getidorder() . "/pagseguro");
+			exit;
 
-	header('Location: /order/' . $order->getidorder()."/pagseguro");
-	exit;
+		case 2:
+			header('Location: /order/' . $order->getidorder() . "/paypal");
+			exit;
+	}
+
 });
 
 $app->get("/login", function () {
@@ -466,16 +473,16 @@ $app->get("/profile/orders/:idorder", function ($idorder) {
 });
 
 
-$app->get("/profile/change-password", function(){
+$app->get("/profile/change-password", function () {
 	User::verifyLogin(false);
 	$page = new Page();
 	$page->setTpl("profile-change-password", [
-		'changePassError'=>User::getError(),
-		'changePassSuccess'=>User::getSuccess()
+		'changePassError' => User::getError(),
+		'changePassSuccess' => User::getSuccess()
 	]);
 });
 
-$app->post("/profile/change-password", function(){
+$app->post("/profile/change-password", function () {
 	User::verifyLogin(false);
 
 	if (!isset($_POST['current_pass']) || $_POST['current_pass'] === '') {
@@ -499,14 +506,14 @@ $app->post("/profile/change-password", function(){
 	if ($_POST['current_pass'] === $_POST['new_pass']) {
 		User::setError("A sua nova senha deve ser diferente da atual.");
 		header("Location: /profile/change-password");
-		exit;		
+		exit;
 	}
 	$user = User::getFromSession();
 
 	if (!password_verify($_POST['current_pass'], $user->getdespassword())) {
 		User::setError("A senha está inválida.");
 		header("Location: /profile/change-password");
-		exit;			
+		exit;
 	}
 	var_dump($_POST);
 	$user->setdespassword($_POST['new_pass']);
@@ -516,25 +523,45 @@ $app->post("/profile/change-password", function(){
 	exit;
 });
 
-$app->get("/order/:idorder/pagseguro",function ($idorder){
+$app->get("/order/:idorder/pagseguro", function ($idorder) {
 
 	User::verifyLogin(false);
 
 	$page = new Page([
-		'header'=>false,
-		'footer'=>false
+		'header' => false,
+		'footer' => false
 
 	]);
 	$order = new Order();
 	$order->get((int)$idorder);
-	$cart=$order->getCart();
-	$page->setTpl("payment-pagseguro",[
-		'order'=>$order->getValues(),
-		'cart'=>$cart->getValues(),
-		'products'=>$cart->getProducts(),
-		'phone'=>[
-			'areacode'=>substr($order->getnrphone(),0,2),
-			'number'=>substr($order->getnrphone(),2,strlen($order->getnrphone()))
+	$cart = $order->getCart();
+	$page->setTpl("payment-pagseguro", [
+		'order' => $order->getValues(),
+		'cart' => $cart->getValues(),
+		'products' => $cart->getProducts(),
+		'phone' => [
+			'areacode' => substr($order->getnrphone(), 0, 2),
+			'number' => substr($order->getnrphone(), 2, strlen($order->getnrphone()))
 		]
+	]);
+});
+
+
+$app->get("/order/:idorder/paypal", function ($idorder) {
+
+	User::verifyLogin(false);
+
+	$page = new Page([
+		'header' => false,
+		'footer' => false
+
+	]);
+	$order = new Order();
+	$order->get((int)$idorder);
+	$cart = $order->getCart();
+	$page->setTpl("payment-paypal", [
+		'order' => $order->getValues(),
+		'cart' => $cart->getValues(),
+		'products' => $cart->getProducts()
 	]);
 });
